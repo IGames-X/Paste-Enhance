@@ -1,0 +1,44 @@
+{
+  "name": "paste-enhance",
+  "displayName": "Paste Enhance",
+  "version": "0.0.1",
+  "publisher": "igamesx",
+  "description": "Enhanced paste for Claude in Cursor terminal.",
+  "license": "MIT",
+  "categories": ["Other"],
+  "icon": "icon.png",
+  "engines": { "vscode": "^1.60.0" },
+  "activationEvents": ["onCommand:paste-enhance.paste"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "paste-enhance.paste",
+        "title": "Paste Enhance: Smart Paste to Terminal"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "paste-enhance.paste",
+        "key": "ctrl+alt+v",
+        "when": "terminalFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Paste Enhance",
+      "properties": {
+        "pasteEnhance.tempImageDir": {
+          "type": "string",
+          "default": "",
+          "description": "临时图片存放目录。留空则使用默认路径 %USERPROFILE%\\.claude\\clipTemp"
+        },
+        "pasteEnhance.maxCachedImages": {
+          "type": "number",
+          "default": 20,
+          "minimum": 1,
+          "description": "临时目录中最多保留的图片数量"
+        }
+      }
+    }
+  }
+}
