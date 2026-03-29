@@ -2,7 +2,19 @@ const vscode = require('vscode');
 const { spawn } = require('child_process');
 const path = require('path');
 
-const PS_EXE = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
+function findPowerShell() {
+    // 优先使用 PS7（pwsh），回退到 PS5（powershell）
+    // 直接用命令名，由系统 PATH 解析，不硬编码路径
+    const { execSync } = require('child_process');
+    try {
+        execSync('pwsh -NoProfile -Command exit', { timeout: 3000, windowsHide: true });
+        return 'pwsh';
+    } catch {
+        return 'powershell';
+    }
+}
+
+const PS_EXE = findPowerShell();
 
 let daemon = null;
 let daemonReady = false;
@@ -15,7 +27,7 @@ function startDaemon(scriptPath, tempImageDir, maxCachedImages) {
     daemonReady = false;
     outputBuffer = '';
 
-    const args = ['-STA', '-NoProfile', '-File', scriptPath];
+    const args = ['-STA', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', scriptPath];
     if (tempImageDir) {
         args.push('-Dir', tempImageDir);
     }
