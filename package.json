@@ -1,7 +1,7 @@
 {
   "name": "paste-enhance",
   "displayName": "Paste Enhance",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "igamesx",
   "description": "Enhanced paste for Claude in Cursor terminal.",
   "license": "MIT",
