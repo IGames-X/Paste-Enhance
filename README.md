@@ -56,18 +56,6 @@ When the clipboard contains plain text, it is pasted normally.
 ---
 ---
 
-## 更新日志
-
-### 0.0.2
-- 修复：在 PowerShell 5 执行策略为 `Restricted` 的新电脑上（Windows 默认设置），插件无法正常工作的问题。现在启动 daemon 时自动附加 `-ExecutionPolicy Bypass`，用户无需任何手动配置。
-- 修复：移除硬编码的 PowerShell 5 路径，改为动态检测——优先使用 PowerShell 7（`pwsh`），不存在时回退到 PowerShell 5（`powershell`）。
-
-### 0.0.1
-- 初始版本发布
-
----
----
-
 ## 功能
 
 ### 🖼️ 截图直接粘贴
@@ -105,3 +93,14 @@ When the clipboard contains plain text, it is pasted normally.
 
 - 仅支持 **Windows** 平台
 - 需要配合 **Cursor** + **Claude Code** 使用
+
+---
+
+## 更新日志
+
+### 0.0.2
+- 修复：在 PowerShell 5 执行策略为 `Restricted` 的新电脑上（Windows 默认设置），插件无法正常工作的问题。现在启动 daemon 时自动附加 `-ExecutionPolicy Bypass`，用户无需任何手动配置。
+- 修复：移除硬编码的 PowerShell 5 路径，改为动态检测——优先使用 PowerShell 7（`pwsh`），不存在时回退到 PowerShell 5（`powershell`）。
+
+### 0.0.1
+- 初始版本发布
