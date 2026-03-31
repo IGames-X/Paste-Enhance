@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.4
+
+- Performance: Changed activation event from `onCommand` to `onStartupFinished` — the PowerShell daemon now pre-warms in the background when VS Code starts, eliminating the 1–2 second delay on first paste.
+- Performance: `findPowerShell()` is now asynchronous (uses `exec` instead of `execSync`), so PowerShell version detection no longer blocks the main thread.
+
+- 性能优化：将激活事件从 `onCommand` 改为 `onStartupFinished`——PowerShell Daemon 在 VS Code 启动后即在后台预热，首次粘贴不再有 1–2 秒延迟。
+- 性能优化：`findPowerShell()` 改为异步实现（使用 `exec` 替代 `execSync`），PowerShell 版本检测不再阻塞主线程。
+
 ## 0.0.3
 
 - Added: `CHANGELOG.md` to display version history on Open VSX Registry.

@@ -1,14 +1,14 @@
 {
   "name": "paste-enhance",
   "displayName": "Paste Enhance",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "igamesx",
-  "description": "Enhanced paste for Claude in Cursor terminal.",
+  "description": "Enhanced paste for Cursor terminal — works with any terminal session, including Claude Code.",
   "license": "MIT",
   "categories": ["Other"],
   "icon": "icon.png",
   "engines": { "vscode": "^1.60.0" },
-  "activationEvents": ["onCommand:paste-enhance.paste"],
+  "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
   "contributes": {
     "commands": [

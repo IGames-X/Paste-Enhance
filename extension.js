@@ -1,20 +1,21 @@
 const vscode = require('vscode');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const path = require('path');
 
-function findPowerShell() {
-    // 优先使用 PS7（pwsh），回退到 PS5（powershell）
-    // 直接用命令名，由系统 PATH 解析，不硬编码路径
-    const { execSync } = require('child_process');
-    try {
-        execSync('pwsh -NoProfile -Command exit', { timeout: 3000, windowsHide: true });
-        return 'pwsh';
-    } catch {
-        return 'powershell';
-    }
-}
+// 异步检测 PowerShell 版本，优先 PS7（pwsh），回退到 PS5（powershell）
+// 结果缓存为 Promise，避免重复检测和阻塞主线程
+let psExePromise = null;
 
-const PS_EXE = findPowerShell();
+function findPowerShell() {
+    if (!psExePromise) {
+        psExePromise = new Promise((resolve) => {
+            const p = exec('pwsh -NoProfile -Command exit', { timeout: 3000, windowsHide: true });
+            p.on('close', (code) => resolve(code === 0 ? 'pwsh' : 'powershell'));
+            p.on('error', () => resolve('powershell'));
+        });
+    }
+    return psExePromise;
+}
 
 let daemon = null;
 let daemonReady = false;
@@ -23,7 +24,8 @@ let readyResolver = null;
 let responseResolver = null;
 let outputBuffer = '';
 
-function startDaemon(scriptPath, tempImageDir, maxCachedImages) {
+async function startDaemon(scriptPath, tempImageDir, maxCachedImages) {
+    const PS_EXE = await findPowerShell();
     daemonReady = false;
     outputBuffer = '';
 
