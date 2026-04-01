@@ -2,19 +2,24 @@ const vscode = require('vscode');
 const { spawn, exec } = require('child_process');
 const path = require('path');
 
-// 异步检测 PowerShell 版本，优先 PS7（pwsh），回退到 PS5（powershell）
-// 结果缓存为 Promise，避免重复检测和阻塞主线程
-let psExePromise = null;
+// 依次尝试候选列表，找到第一个可用的 PowerShell 可执行文件并缓存
+// 只缓存成功结果；失败时下次调用会重新检测
+let psExeCache = null;
 
-function findPowerShell() {
-    if (!psExePromise) {
-        psExePromise = new Promise((resolve) => {
-            const p = exec('pwsh -NoProfile -Command exit', { timeout: 3000, windowsHide: true });
-            p.on('close', (code) => resolve(code === 0 ? 'pwsh' : 'powershell'));
-            p.on('error', () => resolve('powershell'));
+async function findPowerShell() {
+    if (psExeCache) return psExeCache;
+    for (const exe of ['pwsh', 'powershell']) {
+        const found = await new Promise((resolve) => {
+            const p = exec(`${exe} -NoProfile -Command exit`, { timeout: 5000, windowsHide: true });
+            p.on('close', (code) => resolve(code === 0 ? exe : null));
+            p.on('error', () => resolve(null));
         });
+        if (found) {
+            psExeCache = found;
+            return found;
+        }
     }
-    return psExePromise;
+    return null;
 }
 
 let daemon = null;
@@ -26,6 +31,10 @@ let outputBuffer = '';
 
 async function startDaemon(scriptPath, tempImageDir, maxCachedImages) {
     const PS_EXE = await findPowerShell();
+    if (!PS_EXE) {
+        daemonStartPromise = null;
+        throw new Error('未找到可用的 PowerShell（pwsh / powershell），请确认已安装');
+    }
     daemonReady = false;
     outputBuffer = '';
 
@@ -35,12 +44,24 @@ async function startDaemon(scriptPath, tempImageDir, maxCachedImages) {
     }
     args.push('-MaxImages', String(maxCachedImages));
 
-    daemon = spawn(PS_EXE, args, {
-        windowsHide: true
+    const proc = spawn(PS_EXE, args, {
+        windowsHide: true,
+        stdio: ['pipe', 'pipe', 'pipe']
+    });
+    daemon = proc;
+
+    proc.on('error', (err) => {
+        if (daemon !== proc) return;
+        daemon = null;
+        daemonStartPromise = null;
+        psExeCache = null; // 清除缓存，下次重新检测
+        if (readyResolver) { readyResolver(); readyResolver = null; }
+        vscode.window.showErrorMessage('Paste Enhance: 无法启动守护进程 — ' + err.message);
     });
 
-    daemon.stdout.setEncoding('utf8');
-    daemon.stdout.on('data', (data) => {
+    proc.stdout.setEncoding('utf8');
+    proc.stdout.on('data', (data) => {
+        if (daemon !== proc) return; // 忽略已被替换的旧进程消息
         outputBuffer += data;
         const lines = outputBuffer.split(/\r?\n/);
         outputBuffer = lines.pop();
@@ -48,7 +69,6 @@ async function startDaemon(scriptPath, tempImageDir, maxCachedImages) {
             const msg = line.trim();
             if (!msg) continue;
             if (!daemonReady) {
-                // 第一条消息固定是 READY，单独处理，不传给 responseResolver
                 if (msg === 'READY') {
                     daemonReady = true;
                     if (readyResolver) { readyResolver(); readyResolver = null; }
@@ -60,13 +80,36 @@ async function startDaemon(scriptPath, tempImageDir, maxCachedImages) {
         }
     });
 
-    daemon.on('exit', () => {
+    proc.stderr.setEncoding('utf8');
+    proc.stderr.on('data', (data) => {
+        if (daemon !== proc) return;
+        vscode.window.showErrorMessage('Paste Enhance daemon 错误: ' + data.trim());
+    });
+
+    proc.on('exit', (code) => {
+        if (daemon !== proc) return; // 已被替换，忽略
+        if (!daemonReady) {
+            vscode.window.showErrorMessage(`Paste Enhance: daemon 启动失败，退出码 ${code}`);
+        }
+        if (readyResolver) { readyResolver(); readyResolver = null; }
         daemon = null;
         daemonReady = false;
         daemonStartPromise = null;
     });
 
-    return new Promise((resolve) => { readyResolver = resolve; });
+    return new Promise((resolve, reject) => {
+        readyResolver = resolve;
+        setTimeout(() => {
+            if (daemonReady) return; // 已就绪，无需处理
+            readyResolver = null;
+            daemonStartPromise = null;
+            if (daemon === proc) {
+                daemon = null;
+                proc.kill(); // kill 旧进程，exit 事件因 daemon!==proc 会被忽略
+            }
+            reject(new Error('守护进程启动超时，请再按一次快捷键重试'));
+        }, 25000);
+    });
 }
 
 async function ensureDaemon(scriptPath, tempImageDir, maxCachedImages) {
@@ -125,12 +168,20 @@ function activate(context) {
     context.subscriptions.push(configWatcher);
 
     const disposable = vscode.commands.registerCommand('paste-enhance.paste', async () => {
-        const terminal = vscode.window.activeTerminal;
-        if (!terminal) return;
+        const terminal = vscode.window.activeTerminal || vscode.window.terminals[0];
+        if (!terminal) {
+            vscode.window.showWarningMessage('Paste Enhance: 未找到终端，请先打开一个终端');
+            return;
+        }
 
         const { tempImageDir: dir, maxCachedImages: max } = getConfig();
+        let statusMsg = null;
         try {
+            if (!daemonReady) {
+                statusMsg = vscode.window.setStatusBarMessage('$(sync~spin) Paste Enhance 启动中...');
+            }
             await ensureDaemon(daemonScript, dir, max);
+            statusMsg && statusMsg.dispose(); statusMsg = null;
             const result = await sendSave();
             if (result && result !== 'NONE') {
                 const paths = result.split(' ');
@@ -149,6 +200,7 @@ function activate(context) {
                 if (text) terminal.sendText(text, false);
             }
         } catch (e) {
+            statusMsg && statusMsg.dispose();
             vscode.window.showErrorMessage('Paste Enhance: ' + e.message);
         }
     });
