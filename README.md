@@ -46,6 +46,17 @@ When the clipboard contains plain text, it is pasted normally.
 
 ## Changelog
 
+### 0.0.5
+- Fixed: `activeTerminal` API returning `null` in Cursor even when a terminal is focused — the plugin now falls back to the first available terminal, preventing silent no-op on shortcut press.
+- Fixed: PowerShell detection result being permanently cached on failure — when the system is busy at startup and `pwsh` detection times out, the bad result was cached and caused all subsequent attempts to fail. Detection is now only cached on success.
+- Fixed: Detection now tries `pwsh` then `powershell` sequentially (5 s timeout each) and caches only the first working one, compatible with PS5-only, PS7-only, or both environments.
+- Fixed: Daemon stdout pipe potentially corrupted when Cursor's integrated terminal reinitializes during startup. Spawn options now explicitly set `stdio: ['pipe', 'pipe', 'pipe']` to prevent terminal handle inheritance.
+- Fixed: On daemon spawn failure (e.g. ENOENT), the cached PS executable is cleared so the next shortcut press re-detects correctly instead of failing permanently.
+- Fixed: Added `proc.on('error')` handler — spawn errors are now surfaced to the user instead of silently hanging.
+- Fixed: Daemon startup timeout extended from 8 s to 25 s — `Add-Type -AssemblyName System.Windows.Forms/Drawing` can take over 10 s on first load under high system load. On timeout the process is killed, all state is reset, and the user is prompted to retry.
+- Fixed: After a timeout the dangling daemon process was not killed, causing a second shortcut press to spawn a second PowerShell instance and corrupt global state.
+- Improved: Status bar shows a spinner ("Paste Enhance 启动中...") while waiting for the daemon.
+
 ### 0.0.4
 - Performance: Changed activation event to `onStartupFinished` — daemon pre-warms at startup, eliminating first-paste delay.
 - Performance: PowerShell version detection is now asynchronous, no longer blocking the main thread.
@@ -104,6 +115,17 @@ When the clipboard contains plain text, it is pasted normally.
 ---
 
 ## 更新日志
+
+### 0.0.5
+- 修复：在 Cursor 中终端获焦时 `activeTerminal` API 仍返回 `null` 的问题——现在回退到第一个可用终端，避免快捷键静默失效。
+- 修复：PowerShell 检测结果在失败时被永久缓存的问题——系统繁忙时 `pwsh` 检测超时，错误结果被缓存后所有后续尝试均失败。现在仅在检测成功时才缓存结果。
+- 修复：检测逻辑改为依次尝试 `pwsh` → `powershell`（每个超时 5 秒），仅缓存第一个可用项，兼容只有 PS5、只有 PS7 或两者并存的环境。
+- 修复：Cursor 集成终端在启动期间重新初始化时，可能导致 daemon 的 stdout pipe 被破坏。spawn 选项现在显式设置 `stdio: ['pipe', 'pipe', 'pipe']`，防止继承终端句柄。
+- 修复：daemon spawn 失败（如 ENOENT）时，现在清除已缓存的 PS 可执行文件路径，下次按快捷键能重新检测，而非永久失效。
+- 修复：新增 `proc.on('error')` 处理器——spawn 错误现在会明确提示用户，而不再静默挂起。
+- 修复：daemon 启动超时时间从 8 秒调整为 25 秒——系统负载高时首次加载 `System.Windows.Forms/Drawing` 程序集可能超过 10 秒。超时后自动 kill 进程、重置状态，并提示用户再按一次重试。
+- 修复：超时后未 kill 残留的 daemon 进程，导致第二次按快捷键会再启动一个 PowerShell 实例，两进程竞争写入全局状态变量造成混乱。
+- 优化：等待 daemon 启动时状态栏显示旋转图标（"Paste Enhance 启动中..."），用户可明确感知插件正在工作。
 
 ### 0.0.4
 - 性能优化：激活事件改为 `onStartupFinished`，Daemon 在启动时预热，消除首次粘贴延迟。
