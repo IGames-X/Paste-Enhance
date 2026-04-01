@@ -46,6 +46,9 @@ When the clipboard contains plain text, it is pasted normally.
 
 ## Changelog
 
+### 0.0.6
+- Fixed: Minor bug fixes.
+
 ### 0.0.5
 - Fixed: `activeTerminal` API returning `null` in Cursor even when a terminal is focused — the plugin now falls back to the first available terminal, preventing silent no-op on shortcut press.
 - Fixed: PowerShell detection result being permanently cached on failure — when the system is busy at startup and `pwsh` detection times out, the bad result was cached and caused all subsequent attempts to fail. Detection is now only cached on success.
@@ -115,6 +118,9 @@ When the clipboard contains plain text, it is pasted normally.
 ---
 
 ## 更新日志
+
+### 0.0.6
+- 修复：修复一些错误。
 
 ### 0.0.5
 - 修复：在 Cursor 中终端获焦时 `activeTerminal` API 仍返回 `null` 的问题——现在回退到第一个可用终端，避免快捷键静默失效。

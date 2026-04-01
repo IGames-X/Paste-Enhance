@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.6
+
+- Fixed: Minor bug fixes.
+- 修复：修复一些错误。
+
 ## 0.0.5
 
 - Fixed: `activeTerminal` API returning `null` in Cursor even when a terminal is focused — the plugin now falls back to the first available terminal, preventing silent no-op on shortcut press.
