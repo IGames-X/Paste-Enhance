@@ -1,10 +1,14 @@
 {
   "name": "paste-enhance",
   "displayName": "Paste Enhance",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "publisher": "igamesx",
-  "description": "Enhanced paste for Cursor terminal — works with any terminal session, including Claude Code.",
+  "description": "Enhanced paste for terminal — supports screenshots, multiple file paths, and plain text.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IGames-X/Paste-Enhance"
+  },
   "categories": ["Other"],
   "icon": "icon.png",
   "engines": { "vscode": "^1.60.0" },
@@ -14,7 +18,7 @@
     "commands": [
       {
         "command": "paste-enhance.paste",
-        "title": "Paste Enhance: Smart Paste to Terminal"
+        "title": "Paste Enhance: Paste to Terminal"
       }
     ],
     "keybindings": [

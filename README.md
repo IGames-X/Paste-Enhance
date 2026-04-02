@@ -1,6 +1,6 @@
 # Paste Enhance
 
-Enhanced paste for Cursor terminal — works with any terminal session, including Claude Code.
+Enhanced paste for terminal — supports screenshots, multiple file paths, and plain text.
 
 ---
 
@@ -22,7 +22,7 @@ When the clipboard contains plain text, it is pasted normally.
 
 ## Usage
 
-1. Open a terminal in Cursor
+1. Open a terminal
 2. Take a screenshot or copy files in Explorer
 3. Press `Ctrl+Alt+V` in the terminal
 
@@ -40,20 +40,24 @@ When the clipboard contains plain text, it is pasted normally.
 ## Requirements
 
 - **Windows only** — relies on PowerShell and Windows clipboard APIs
-- Designed for use with **Cursor** — works with any terminal session, including **Claude Code**
+- Works with any terminal session, including **Claude Code**
 
 ---
 
 ## Changelog
 
+### 0.0.7
+- Improved: Removed IDE-specific references from all descriptions — the plugin works with any VS Code-compatible terminal.
+- 优化：去除所有描述中对特定 IDE 的限定，插件适用于任意兼容 VS Code 的终端环境。
+
 ### 0.0.6
 - Fixed: Minor bug fixes.
 
 ### 0.0.5
-- Fixed: `activeTerminal` API returning `null` in Cursor even when a terminal is focused — the plugin now falls back to the first available terminal, preventing silent no-op on shortcut press.
+- Fixed: `activeTerminal` API returning `null` even when a terminal is focused — the plugin now falls back to the first available terminal, preventing silent no-op on shortcut press.
 - Fixed: PowerShell detection result being permanently cached on failure — when the system is busy at startup and `pwsh` detection times out, the bad result was cached and caused all subsequent attempts to fail. Detection is now only cached on success.
 - Fixed: Detection now tries `pwsh` then `powershell` sequentially (5 s timeout each) and caches only the first working one, compatible with PS5-only, PS7-only, or both environments.
-- Fixed: Daemon stdout pipe potentially corrupted when Cursor's integrated terminal reinitializes during startup. Spawn options now explicitly set `stdio: ['pipe', 'pipe', 'pipe']` to prevent terminal handle inheritance.
+- Fixed: Daemon stdout pipe potentially corrupted when the integrated terminal reinitializes during startup. Spawn options now explicitly set `stdio: ['pipe', 'pipe', 'pipe']` to prevent terminal handle inheritance.
 - Fixed: On daemon spawn failure (e.g. ENOENT), the cached PS executable is cleared so the next shortcut press re-detects correctly instead of failing permanently.
 - Fixed: Added `proc.on('error')` handler — spawn errors are now surfaced to the user instead of silently hanging.
 - Fixed: Daemon startup timeout extended from 8 s to 25 s — `Add-Type -AssemblyName System.Windows.Forms/Drawing` can take over 10 s on first load under high system load. On timeout the process is killed, all state is reset, and the user is prompted to retry.
@@ -95,7 +99,7 @@ When the clipboard contains plain text, it is pasted normally.
 
 ## 使用方法
 
-1. 在 Cursor 中打开终端
+1. 打开终端
 2. 截图或在资源管理器中复制文件
 3. 在终端中按 `Ctrl+Alt+V`
 
@@ -113,7 +117,7 @@ When the clipboard contains plain text, it is pasted normally.
 ## 环境要求
 
 - 仅支持 **Windows** 平台
-- 需要配合 **Cursor** 使用，适用于任意终端会话，包括 **Claude Code**
+- 适用于任意终端会话，包括 **Claude Code**
 
 ---
 
