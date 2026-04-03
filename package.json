@@ -1,7 +1,7 @@
 {
   "name": "paste-enhance",
   "displayName": "Paste Enhance",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "publisher": "igamesx",
   "description": "Enhanced paste for terminal — supports screenshots, multiple file paths, and plain text.",
   "license": "MIT",

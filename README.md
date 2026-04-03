@@ -46,6 +46,9 @@ When the clipboard contains plain text, it is pasted normally.
 
 ## Changelog
 
+### 0.0.8
+- Fixed: Screenshot images could not be pasted after upgrading to PowerShell 7.6.0. Replaced `GetDataObject().GetData("System.Drawing.Bitmap")` with `Clipboard.GetImage()`, which works consistently across PowerShell 5 and all PowerShell 7 versions.
+
 ### 0.0.7
 - Improved: Removed IDE-specific references from all descriptions — the plugin works with any VS Code-compatible terminal.
 - 优化：去除所有描述中对特定 IDE 的限定，插件适用于任意兼容 VS Code 的终端环境。
@@ -122,6 +125,12 @@ When the clipboard contains plain text, it is pasted normally.
 ---
 
 ## 更新日志
+
+### 0.0.8
+- 修复：升级 PowerShell 至 7.6.0 后截图无法粘贴的问题。将 `GetDataObject().GetData("System.Drawing.Bitmap")` 替换为 `Clipboard.GetImage()`，在 PowerShell 5 及所有 PowerShell 7 版本上行为一致。
+
+### 0.0.7
+- 优化：去除所有描述中对特定 IDE 的限定，插件适用于任意兼容 VS Code 的终端环境。
 
 ### 0.0.6
 - 修复：修复一些错误。

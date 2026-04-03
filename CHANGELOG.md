@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.8
+
+- Fixed: Screenshot images could not be pasted after upgrading to PowerShell 7.6.0. The daemon was using `GetDataObject().GetData("System.Drawing.Bitmap")` which returns `null` in PowerShell 7.6 due to a .NET WinForms clipboard implementation change. Replaced with `Clipboard.GetImage()`, the dedicated static API that works consistently across PowerShell 5 and all PowerShell 7 versions.
+
+- 修复：升级 PowerShell 至 7.6.0 后截图无法粘贴的问题。Daemon 原先使用 `GetDataObject().GetData("System.Drawing.Bitmap")` 获取剪贴板图片，但该调用在 PowerShell 7.6 的 .NET WinForms 剪贴板实现变更后始终返回 null。现已改用专用静态 API `Clipboard.GetImage()`，在 PowerShell 5 及所有 PowerShell 7 版本上行为一致。
+
 ## 0.0.7
 
 - Improved: Removed IDE-specific references from all descriptions — the plugin works with any VS Code-compatible terminal.

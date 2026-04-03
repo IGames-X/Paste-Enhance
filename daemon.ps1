@@ -47,11 +47,11 @@ while ($true) {
     }
 
     # Priority 3: Raw Bitmap (screenshot, no text, no file)
+    # 注意：GetData("System.Drawing.Bitmap") 在 PowerShell 中会返回 null，需用 GetImage()
     $img = $null
-    if ($obj.GetDataPresent("System.Drawing.Bitmap")) {
-        $img = $obj.GetData("System.Drawing.Bitmap")
-    } elseif ($obj.GetDataPresent("Bitmap")) {
-        $img = $obj.GetData("Bitmap")
+    if ($obj.GetDataPresent([System.Windows.Forms.DataFormats]::Bitmap) -or
+        $obj.GetDataPresent("System.Drawing.Bitmap")) {
+        $img = [System.Windows.Forms.Clipboard]::GetImage()
     }
 
     if ($null -eq $img) {
