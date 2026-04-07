@@ -1,0 +1,23 @@
+<idea-plugin>
+    <id>com.igamesx.pasteenhance</id>
+    <name>Paste Enhance</name>
+    <version>1.0.0</version>
+    <vendor>igamesx</vendor>
+    <description>Paste image/file paths to Rider integrated terminal via Ctrl+Alt+V.
+        When the clipboard contains a screenshot, it saves the image to a temp file and
+        types the file path into the terminal. File drops and plain text fall back to
+        the standard paste behavior.
+    </description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.plugins.terminal</depends>
+
+    <actions>
+        <action id="PasteEnhance.PasteAction"
+                class="com.igamesx.pasteenhance.PasteAction"
+                text="Paste Enhance: Paste to Terminal">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt V"/>
+            <add-to-group group-id="Terminal.PopupMenu" anchor="first"/>
+        </action>
+    </actions>
+</idea-plugin>
