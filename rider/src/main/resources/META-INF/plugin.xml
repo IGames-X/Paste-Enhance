@@ -17,7 +17,9 @@
                 class="com.igamesx.pasteenhance.PasteAction"
                 text="Paste Enhance: Paste to Terminal">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt V"/>
-            <add-to-group group-id="Terminal.PopupMenu" anchor="first"/>
+            <add-to-group group-id="Terminal.PromptContextMenu" anchor="first"/>
+            <add-to-group group-id="Terminal.OutputContextMenu" anchor="first"/>
+            <add-to-group group-id="Terminal.ReworkedTerminalContextMenu" anchor="first"/>
         </action>
     </actions>
 </idea-plugin>
