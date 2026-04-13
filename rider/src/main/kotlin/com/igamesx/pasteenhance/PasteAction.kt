@@ -21,13 +21,6 @@ class PasteAction : AnAction() {
         "png", "jpg", "jpeg", "gif", "bmp", "webp", "tiff", "tif", "heic", "heif", "avif"
     )
 
-    companion object {
-        // Cache the last successfully resolved TerminalView.
-        // Updated every time the action is used while the terminal is focused.
-        @Volatile
-        var lastKnownTerminalView: Any? = null
-    }
-
     private fun isImagePath(path: String): Boolean =
         path.substringAfterLast('.', "").lowercase() in imageExts
 
@@ -41,7 +34,7 @@ class PasteAction : AnAction() {
         if (!ideSelectedFiles.isNullOrEmpty()) {
             val paths = ideSelectedFiles.joinToString(" ") { it.path }
 
-            val directView = resolveTerminalView(e) ?: lastKnownTerminalView
+            val directView = resolveTerminalView(e)
             if (directView != null) {
                 sendPathsToTerminal(directView, paths)
             } else {
@@ -55,7 +48,6 @@ class PasteAction : AnAction() {
                     val view = resolveTerminalViewFromFocus()
                         ?: resolveTerminalFromToolWindow(project)
                     if (view != null) {
-                        lastKnownTerminalView = view
                         sendPathsToTerminal(view, paths)
                     } else {
                         log.warn("PasteEnhance: could not resolve TerminalView after activation")
@@ -114,13 +106,10 @@ class PasteAction : AnAction() {
     /**
      * Resolves TerminalView from the action's DataContext.
      * Succeeds only when focus is currently inside the terminal panel.
-     * Side-effect: updates [lastKnownTerminalView] cache on success.
      */
     private fun resolveTerminalView(e: AnActionEvent): Any? {
         return try {
-            val view = getTerminalDataKey()?.let { e.dataContext.getData(it) }
-            if (view != null) lastKnownTerminalView = view
-            view
+            getTerminalDataKey()?.let { e.dataContext.getData(it) }
         } catch (ex: Exception) {
             log.warn("PasteEnhance: resolveTerminalView failed", ex)
             null
@@ -152,9 +141,7 @@ class PasteAction : AnAction() {
         return try {
             val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("Terminal")
                 ?: return null
-            val content = toolWindow.contentManager.selectedContent
-                ?: toolWindow.contentManager.contents.firstOrNull()
-                ?: return null
+            val content = toolWindow.contentManager.selectedContent ?: return null
             val terminalViewClass = Class.forName("com.intellij.terminal.frontend.view.TerminalView")
             findComponentByClass(content.component, terminalViewClass)
         } catch (ex: Exception) {
